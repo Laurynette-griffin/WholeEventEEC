@@ -67,6 +67,8 @@ void plotmaker_eec() {
   EEC_w_p.GetXaxis()->SetTitleOffset(999);
   EEC_w_p.GetXaxis()->SetTickLength(0);
 
+  
+  //thankfully this only needs to be done once since all of the WEEEC have the same x axis 
   TGaxis *axis1 = new TGaxis(0, 0, 25, 0, .0001, .5, 510, "G"); 
   TGaxis *axis2 = new TGaxis(50, 0, 25, 0, .0001 , .5 , 510, "-G");
   axis1->ChangeLabel(2, -1, 0, -1, -1, 62, "1 - 10^{-4}" );
@@ -143,22 +145,8 @@ void plotmaker_eec() {
   EEC_w_pb.GetXaxis()->SetTitleOffset(999);
   EEC_w_pb.Draw("P E1");
 
-  //thankfully this only needs to be done once since all of the WEEEC have the same x axis 
-  TGaxis *axis3 = new TGaxis(0, 0, 25, 0, .0001, .5, 510, "G");
-  TGaxis *axis4 = new TGaxis(50, 0, 25, 0, .0001, .5, 510, "-G");
-  axis3->ChangeLabel(2, -1, 0, -1, -1, 62, "1 - 10^{-4}" );
-  axis3->ChangeLabel(4, -1, 0, -1, -1, 62, "1 - 10^{-4}" );
-  axis4->ChangeLabel(1, -1, -1, -1, -1, 62, "1 - 10^{-4}" );
-  axis4->ChangeLabel(2, -1, 0, -1, -1, 62, "1 - 10^{-3}" );
-  axis4->ChangeLabel(3, -1, -1, -1, -1, 62, "1 - 10^{-2}" );
-  axis4->ChangeLabel(4, -1, 0, -1, -1, 62, "1 - 10^{-1}" );
-  axis4->SetLabelOffset(0.045);
-  axis3->SetLabelSize(.03);
-  axis4->SetLabelSize(.03);
-  axis3->SetTickSize(0.05);
-  axis4->SetTickSize(0.05);
-  axis3->Draw();
-  axis4->Draw(); 
+  axis1->Draw();
+  axis2->Draw();
   
   drawText("0.5", 0.4875, .06, 17 );
   drawText("z = (1 - cos(#Deltar))/2", 0.8, .025, 18 );
