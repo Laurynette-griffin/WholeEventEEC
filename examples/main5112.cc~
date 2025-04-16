@@ -13,7 +13,7 @@ using namespace fastjet;
 using namespace Pythia8;
 using namespace std;
 
-// 8GeV jet cut, .cmnd pthatmin 5 GeV, 
+// e+e- eec changed in .cmnd file 
 
 // Function to compute Delta R
 float deltaR(const PseudoJet& p1, const PseudoJet& p2) {
@@ -21,6 +21,19 @@ float deltaR(const PseudoJet& p1, const PseudoJet& p2) {
   if (dphi > M_PI) dphi = 2 * M_PI - dphi;
   float deta = p1.eta() - p2.eta();
   return std::sqrt(deta * deta + dphi * dphi);
+}
+
+// Function to calulate opening angle
+
+float costheta(const PseudoJet& p1, const PseudoJet& p2) {
+    float dotprod = (p1.px() * p2.px() +  p1.py() * p2.py() +  p1.pz() * p2.pz());
+    float normp1 = std::sqrt(p1.px() * p1.px() + p1.py() * p1.py() + p1.pz() * p1.pz()); 
+    float normp2 = std::sqrt(p2.px() * p2.px() + p2.py() * p2.py() + p2.pz() * p2.pz()); 
+    
+    if (normp1 == 0 || normp2 == 0) // division by 0 check 
+        return 0; 
+    
+    return dotprod / (normp1 * normp2);
 }
 
 const Int_t nDeltaRBinsEECw = 25;
@@ -77,7 +90,7 @@ std::vector<double> binedges;
       (minDeltaREEC + binnerShift) * TMath::Exp(iDeltaR * deltaRlogBinWidth) - binnerShift;
   }
 
-  TFile *out = new TFile("../offline/pythia_wholeeventEEC_8GeV_starEEC_5pthat60_Feb21.root", "RECREATE");
+  TFile *out = new TFile("../offline/pythia_wholeeventEEC_ee_starEEC_Feb21.root", "RECREATE");
     
     if (!out || out->IsZombie()) {
         std::cerr << "Error: Could not open output" << std::endl;
@@ -104,19 +117,25 @@ std::vector<double> binedges;
 
   
   TH1F EEC_w("EEC_w", "Energy Energy Correlator", 50, eecbounds);
-  TH1F EEC_w_p("EEC_w_p", "Energy Energy Correlator", 50, 0, 50);
+  TH1F EEC_w_p("EEC_w_p", "Whole Event EEC", 50, 0, 50);
   
-  TH1F EEC_w_b("EEC_w_b", "Energy Energy Correlator", 100, eecbounds);
-  TH1F EEC_w_pb("EEC_w_pb", "Energy Energy Correlator", 50, 0, 50);
+  TH1F EEC_w_b("EEC_w_b", "Energy Energy Correlator", 50, eecbounds);
+  TH1F EEC_w_pb("EEC_w_pb", "Whole event EEC Balanced", 50, 0, 50);
   
   TH1F EEC_w_ub2("EEC_w_ub2", "Energy Energy Correlator", 50, eecbounds);
-  TH1F EEC_w_pub2("EEC_w_pub2", "Energy Energy Correlator", 50, 0, 50);
+  TH1F EEC_w_pub2("EEC_w_pub2", "Whole Event EEC unbalanced 2", 50, 0, 50);
   
   TH1F EEC_w_b2("EEC_w_b2", "Energy Energy Correlator", 50, eecbounds);
-  TH1F EEC_w_pb2("EEC_w_pb2", "Energy Energy Correlator", 50, 0, 50);
+  TH1F EEC_w_pb2("EEC_w_pb2", "Whole Event EEC balanced 2", 50, 0, 50);
   
   TH1F EEC_w_ub("EEC_w_ub", "Energy Energy Correlator", 50, eecbounds);
-  TH1F EEC_w_pub("EEC_w_pub", "Energy Energy Correlator", 50, 0, 50);
+  TH1F EEC_w_pub("EEC_w_pub", "Whole Event EEC unbalanced ", 50, 0, 50);
+  
+  TH1F EEC_w_b3("EEC_w_b3", "Energy Energy Correlator", 50, eecbounds);
+  TH1F EEC_w_pb3("EEC_w_pb3", "Whole Event EEC balanced 3", 50, 0, 50);
+  
+  TH1F EEC_w_ub3("EEC_w_ub3", "Energy Energy Correlator", 50, eecbounds);
+  TH1F EEC_w_pub3("EEC_w_pub3", "Whole Event EEC unbalanced 3", 50, 0, 50);
   
   
   TH1F EEC_star("EEC_star", "Energy Energy Correlator",nDeltaRBinsEEC, deltaRBinsEEC);
@@ -131,23 +150,39 @@ std::vector<double> binedges;
   }
   
   pythia.init();
+  
 
-  float jet_radius = 0.4;
-  fastjet::JetDefinition jet_def(fastjet::antikt_algorithm, jet_radius);
+  //float jet_radius = 0.4;
+  fastjet::JetDefinition jet_def(ee_kt_algorithm);
   int dijet_event_counter = 0;
-
-  for (int iEvent = 0; iEvent < 100000; ++iEvent) { // 10000 events for now
+  Sphericity sph;
+   
+  for (int iEvent = 0; iEvent < 10000; ++iEvent) { // 10000 events for now
     if (!pythia.next()) continue;
-
+    
+    // implementing event sphericity cut from lunas paper 
+    sph.analyze(pythia.event);
+    if (sph.sphericity() < (7*M_PI)/36 || sph.sphericity() < (29*M_PI)/36) continue;
+    
     std::vector<fastjet::PseudoJet> event;
 
     // pT cut > .5 GeV
     for (int i = 0; i < pythia.event.size(); ++i) {
       Particle& p = pythia.event[i];
-      if (p.isFinal() && p.pT() > .5) {
+      
+      if (p.isFinal() && p.pT() > .2 && p.isCharged() == 1) {
 	    event.push_back( PseudoJet(p.px(), p.py(), p.pz(), p.e()));
+	    
       }
+    double totale = 0;
+    
+    for (int i = 0; i < event.size(); ++i) {
+        totale = totale + event.at(i).e();
+     }
+    cout  << "Total energy = "<< totale << endl;
+    
     }//! pseudojet of all particles in event loop close
+    
     
     // Perform jet clustering
     fastjet::ClusterSequence cs(event, jet_def);
@@ -173,33 +208,39 @@ std::vector<double> binedges;
   } //!EEC star outer loop close 
 
     // Require atleast two jets
-  if (jets.size() < 2) continue;
+  //if (jets.size() < 2) continue;
     
     //! select di-jets on jet pT 
-  if(jets[0].pt() < 15 || jets[1].pt() < 15) continue;
+  //if(jets[0].pt() < 15 || jets[1].pt() < 15) continue;
+
     
     // Check for dijet condition
-  float dphi = std::abs(jets[0].phi() - jets[1].phi());
-  if (dphi > M_PI) dphi = 2 * M_PI - dphi;
-  if (dphi < (7.0 * M_PI / 8.0)) continue;
-    
-  dijet_event_counter++;
+  //float dphi = std::abs(jets[0].phi() - jets[1].phi());
+  //if (dphi > M_PI) dphi = 2 * M_PI - dphi;
+  //if (dphi < (7.0 * M_PI / 8.0)) continue;
+  
+  //dijet_event_counter++;
     
     //jet asymmetry  
-  float aj = (jets[0].pt()-jets[1].pt()) / (jets[0].pt() + jets[1].pt());
+  float aj = (jets[0].e()-jets[1].e()) / (jets[0].e() + jets[1].e());
   Aj_spectrum.Fill(aj);
-    
+ 
   for (size_t i = 0; i < event.size(); ++i) {
     for (size_t j = i + 1; j < event.size(); ++j) {
-      float eec = event.at(i).pt() * event.at(j).pt();
-      float delr = deltaR(event.at(i), event.at(j));
-      float z = (1 - TMath::Cos(delr))/2 ; 
-      EEC_w.Fill(z, eec);
+      float eec = event.at(i).e() * event.at(j).e();
+      //float delr = deltaR(event.at(i), event.at(j));
+      float q2 = 91.2*91.2;
+      float ctheta = costheta(event[i], event[j]);
+      float z = (1 - ctheta)/2 ; 
+      EEC_w.Fill(z, eec/(q2)); // weighted by the energy scale q2^2
       // filling balanced and unbalanced whole EECs
-      if (aj < 0.667) EEC_w_b.Fill(z, eec);
-      if (aj > 0.667) EEC_w_ub.Fill(z, eec);
+      if (aj < 0.0667) EEC_w_b.Fill(z, eec);
       if (aj < 0.1) EEC_w_b2.Fill(z, eec);
+      if (aj < 0.15003) EEC_w_b3.Fill(z, eec);
+      
+      if (aj > 0.0667) EEC_w_ub.Fill(z, eec);
       if (aj > 0.1) EEC_w_ub2.Fill(z, eec);
+      if (aj > 0.15003) EEC_w_ub3.Fill(z, eec);
     } 
   }//!Whole event EEC loop close 
 

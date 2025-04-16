@@ -5,7 +5,7 @@
 Beams:idA = 2212
 Beams:idB = 2212
 Beams:eCM = 200.0  
-PhaseSpace:pTHatMin = 5
+PhaseSpace:pTHatMin = 8
 PhaseSpace:pTHatMax = 60
 
 ! PDF settings

@@ -10,13 +10,13 @@
 
 #SBATCH --mem=64G
 
-#SBATCH --time=05:00:00
+#SBATCH --time=04:00:00
 
-#SBATCH --job-name=45wholeevent_EEC
+#SBATCH --job-name=15wholeevent
 
-#SBATCH --output=../offline/pythia_wholeeventEEC_15GeV_starEEC_10pthat60_Feb21.root
+#SBATCH --output=../offline/pythia_pp_rhic_15GeV_fullevent_5pthat60_Apr15.root
 
-#SBATCH --output=logs/main5111.log
+#SBATCH --output=logs/main511.log
 
 #SBATCH --account=rke_group
 
@@ -24,6 +24,6 @@ source /home/griffl6/setup_pythia8312.sh
 
 cd /home/griffl6/work/pythia/examples
 
-./main5111 main5111.cmnd 
+./main511 main511.cmnd 
 
 echo "Job Finished"

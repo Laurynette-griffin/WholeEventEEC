@@ -1,0 +1,38 @@
+! Detroit Tune for PYTHIA 8
+
+
+! General settings
+Beams:idA = 2212
+Beams:idB = 2212
+Beams:eCM = 200.0  
+PhaseSpace:pTHatMin = 44.75
+PhaseSpace:pTHatMax = 45.25
+
+! PDF settings
+PDF:pSet = 17
+
+! Hard process (example: dijet)
+HardQCD:all = on
+
+! Parton shower settings
+! SpaceShower:rapidityOrder = on
+! SpaceShower:alphaSvalue = 0.127
+
+! Disable underlying event (multiparton interactions)
+PartonLevel:MPI = on
+
+! Disable initial-state radiation
+PartonLevel:ISR = off
+
+! Disable Hadronization
+HadronLevel:Hadronize = on
+
+! Final-state radiation
+TimeShower:alphaSvalue = 0.127
+
+! Output settings
+Stat:showProcessLevel = on
+Stat:showErrors = on
+
+! Event generation
+Main:numberOfEvents = 100

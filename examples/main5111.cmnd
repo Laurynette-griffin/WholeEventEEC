@@ -5,8 +5,8 @@
 Beams:idA = 2212
 Beams:idB = 2212
 Beams:eCM = 200.0  
-PhaseSpace:pTHatMin = 5
-PhaseSpace:pTHatMax = 60
+PhaseSpace:pTHatMin = 44.75
+PhaseSpace:pTHatMax = 45.25
 
 ! PDF settings
 PDF:pSet = 17
@@ -15,8 +15,8 @@ PDF:pSet = 17
 HardQCD:all = on
 
 ! Parton shower settings
-SpaceShower:rapidityOrder = on
-SpaceShower:alphaSvalue = 0.127
+! SpaceShower:rapidityOrder = on
+! SpaceShower:alphaSvalue = 0.127
 
 ! Underlying event parameters (based on Detroit tune)
 MultipartonInteractions:pT0Ref = 1.40

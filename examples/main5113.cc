@@ -87,7 +87,7 @@ int main(int argc, char* argv[]) {
         (minDeltaREEC + binnerShift) * TMath::Exp(iDeltaR * deltaRlogBinWidth) - binnerShift;
     }
 
-    TFile *out = new TFile("../offline/pythia_pp_rhic_8GeV_fullevent_5pthat60_Apr9_dr_thirdjet.root", "RECREATE");
+    TFile *out = new TFile("../offline/pythia_pp_rhic_15GeV_fullevent_5pthat60_Apr15.root", "RECREATE");
     
     if (!out || out->IsZombie()) {
         std::cerr << "Error: Could not open output" << std::endl;
@@ -178,7 +178,7 @@ int main(int argc, char* argv[]) {
             jets.end());
         
         //! select di-jets on jet pT 
-        if(jets[0].pt() < 8 || jets[1].pt() < 8) continue;
+        if(jets[0].pt() < 15 || jets[1].pt() < 15) continue;
         
         // Check for dijet condition
         float dphi = std::abs(jets[0].phi() - jets[1].phi());
@@ -207,10 +207,10 @@ int main(int argc, char* argv[]) {
                 float pmq2 = ((jets[0].pt() + jets[1].pt())/2) *  ((jets[0].pt() + jets[1].pt())/2); // average of leading jets pt squared 
                 float ctheta = costheta(charged_event.at(i), charged_event.at(j));
                 float dr = deltaR(charged_event.at(i), charged_event.at(j));
-                float zr = (1 - cos(dr))/2;
                 Costheta_spectrum.Fill(ctheta);
                 float z = (1 - ctheta)/2; 
                 EEC_w.Fill(z, eec/pmq2);
+                
                 EEC_w_b.Fill(dr, eec/pmq2); // ... lets see i guess lorentz invariance and all that jazz 
 
                 // third jet suppression possibly 

@@ -3,7 +3,7 @@
 
 ! Random seed settings  
 Random:setSeed = on  
-Random:seed = 124578
+Random:seed = 0
 
 ! Beam setup: LEP e+e- collision  
 Beams:idA = -11   ! Beam: e+  
@@ -16,7 +16,6 @@ Tune:ee = 7
 ! Disable PDFs (not needed for e+e- collisions)  
 ! PDF:lepton = off  
 
-!Trying to replicate pythia 6 as best as I can :)
  
 
 ! Enable Z boson production and decay  

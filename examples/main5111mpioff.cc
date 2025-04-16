@@ -14,15 +14,15 @@ using namespace fastjet;
 using namespace Pythia8;
 using namespace std;
 
-// 15 GeV jet cut pthatmin = 10 eec weighted bypmq2
 
 // Function to compute Delta R
 float deltaR(const PseudoJet& p1, const PseudoJet& p2) {
-    float dphi = std::abs(p1.phi() - p2.phi());
-    if (dphi > M_PI) dphi = 2 * M_PI - dphi;
+float dphi = std::abs(p1.phi() - p2.phi());
+if (dphi > M_PI) dphi = 2 * M_PI - dphi;
     float deta = p1.eta() - p2.eta();
     return std::sqrt(deta * deta + dphi * dphi);
 }
+
 
 float costheta(const PseudoJet& p1, const PseudoJet& p2) {
     float dotprod = (p1.px() * p2.px() +  p1.py() * p2.py() +  p1.pz() * p2.pz());
@@ -35,25 +35,10 @@ float costheta(const PseudoJet& p1, const PseudoJet& p2) {
     return (dotprod / (normp1 * normp2));
 }
 
-
-float deltaphitheta(const PseudoJet& p1, const PseudoJet& p2) {
-    float eta1 = p1.eta();
-    float eta2 = p2.eta();
-    float theta1 = 2 * std::atan(std::exp(-1*eta1));
-    float theta2 = 2 * std::atan(std::exp(-1*eta2));
-    // to make sure the value of delta theta is not greater than 180 
-    float dtheta = std::acos(std::cos(theta1 - theta2));
-    
-    float dphi = std::abs(p1.phi() - p2.phi());
-    if (dphi > M_PI) dphi = 2 * M_PI - dphi;
-    
-    return std::sqrt(dtheta * dtheta + dphi * dphi);
-}
-
 const Int_t nDeltaRBinsEECw = 30;
-const Float_t minDeltaREECw = 1e-5; // Avoid log(0) issue
-const Float_t maxDeltaREECw = 0.5;
-const Float_t binnerShiftw = 1e-7;
+const Float_t minDeltaREECw = 1e-2; // Avoid log(0) issue
+const Float_t maxDeltaREECw = 1.67;
+const Float_t binnerShiftw = 0;
 const Float_t deltaRlogBinWidthw =
     (TMath::Log(maxDeltaREECw + binnerShiftw) - TMath::Log(minDeltaREECw + binnerShiftw)) / nDeltaRBinsEECw;
 Float_t deltaRBinsEECw[nDeltaRBinsEECw + 1];
@@ -83,13 +68,13 @@ int main(int argc, char* argv[]) {
     std::vector<double> binedges;
     
     //!   print the values of the bin edges for the left side (1e-4 to 0.5) 
-    for (int iDeltaRw = 0; iDeltaRw <= 30; iDeltaRw++) {
+    for (int iDeltaRw = 0; iDeltaRw <= 50; iDeltaRw++) {
         binedges.push_back((minDeltaREECw + binnerShiftw) * TMath::Exp(iDeltaRw * deltaRlogBinWidthw) - binnerShiftw);
     }    
     
     //!   print the values of the bin edges for the left side (1e-4 to 0.5) 
     for (int iDeltaRw = 29; iDeltaRw >= 0; iDeltaRw--) {
-        binedges.push_back(1. - (minDeltaREECw + binnerShiftw) * TMath::Exp(iDeltaRw * deltaRlogBinWidthw) - binnerShiftw);
+        binedges.push_back(3.38 - (minDeltaREECw + binnerShiftw) * TMath::Exp(iDeltaRw * deltaRlogBinWidthw) - binnerShiftw);
     }    
     
     for(int i = 0; i < binedges.size(); ++i){ 
@@ -100,7 +85,7 @@ int main(int argc, char* argv[]) {
         deltaRBinsEEC[iDeltaR] = (minDeltaREEC + binnerShift) * TMath::Exp(iDeltaR * deltaRlogBinWidth) - binnerShift;
     }
     
-    TFile *out = new TFile("../offline/pythia_pp_rhic_15GeV_fullevent_10pthat60_april15_deltheta.root", "RECREATE");
+    TFile *out = new TFile("../offline/pythia_pp_rhic_45GeV_fullevent_10pthat60_Apr9_mpioff.root", "RECREATE");
     
     if (!out || out->IsZombie()) {
     std::cerr << "Error: Could not open output" << std::endl;
@@ -111,7 +96,7 @@ int main(int argc, char* argv[]) {
     
     std::cout << "created main511.root!" << std::endl;
     
-  Double_t eecbounds[41] = { 0.00001, 0.00004784,  0.00022988, 0.00109302, 0.00156722, 
+    Double_t eecbounds[41] = { 0.00001, 0.00004784,  0.00022988, 0.00109302, 0.00156722, 
                                 0.00224712, 0.00322196, 0.00461969, 0.00662375, 0.00949717, 
                                 0.0136171, 0.0195242, 0.0279938, 0.0401376, 0.0575492, 
                                 0.0825141, 0.118309, 0.169631, 0.243217, 0.348724, 
@@ -120,30 +105,7 @@ int main(int argc, char* argv[]) {
                                 0.942451,  0.959862, 0.972006, 0.980476, 0.986383, 
                                 0.990503, 0.993376, 0.99538, 0.996778, 0.997753, 
                                 0.998433, 0.998907, 0.99977012, 0.99995216, 0.99999};
-    // Initialize histogram'
-    Double_t tryit[101] =   {1e-05, 0.0444099, 0.0888098, 0.1332097, 0.1776096,
-                            0.22200950000000003, 0.2664094000000001, 0.31080930000000007, 0.35520920000000006, 0.39960910000000005,
-                            0.44400900000000004, 0.4884089000000001, 0.5328088000000001, 0.5772087, 0.6216086000000001,
-                            0.6660085, 0.7104084, 0.7548083000000001, 0.7992082, 0.8436081000000001,
-                            0.888008, 0.9324079000000001, 0.9768078000000001, 1.0212077000000002, 1.0656076000000003,
-                            1.1100075000000003, 1.1544074000000002, 1.1988073000000001, 1.2432072000000003, 1.2876071000000002,
-                            1.3320070000000002, 1.3764069000000003, 1.4208068000000003, 1.4652067000000002, 1.5096066000000004,
-                            1.5540065000000003, 1.5984064000000002, 1.6428063000000004, 1.6872062000000003, 1.7316061000000003,
-                            1.7760060000000002, 1.8204059000000004, 1.8648058000000003, 1.9092057000000002, 1.9536056000000004,
-                            1.9980055000000003, 2.0424054000000003, 2.0868053000000004, 2.1312052000000006, 2.1756051000000003,
-                            2.2200050000000005, 2.2644049, 2.3088048000000003, 2.3532047000000005, 2.3976046,
-                            2.4420045000000004, 2.4864044000000005, 2.5308043000000002, 2.5752042000000004, 2.6196041000000005,
-                            2.6640040000000003, 2.7084039000000004, 2.7528038000000006, 2.7972037000000003, 2.8416036000000005,
-                            2.8860035000000006, 2.9304034000000003, 2.9748033000000005, 3.0192032000000006, 3.0636031000000004,
-                            3.1080030000000005, 3.1524029000000007, 3.1968028000000004, 3.2412027000000005, 3.2856026000000007,
-                            3.3300025000000004, 3.3744024000000006, 3.4188023000000007, 3.4632022000000005, 3.5076021000000006,
-                            3.5520020000000003, 3.5964019000000005, 3.6408018000000006, 3.6852017000000004, 3.7296016000000005,
-                            3.7740015000000007, 3.8184014000000004, 3.8628013000000005, 3.9072012000000007, 3.9516011000000004,
-                            3.9960010000000006, 4.0404009, 4.0848008, 4.1292007, 4.1736006,
-                            4.2180005000000005, 4.262400400000001, 4.3068003, 4.3512002, 4.3956001,
-                            4.44};
-    
-    
+    // Initialize histogram
     TH1::SetDefaultSumw2();
     TH2::SetDefaultSumw2();
     
@@ -151,7 +113,7 @@ int main(int argc, char* argv[]) {
     TH1F EEC_w("EEC_w", "Energy Energy Correlator", 40, eecbounds);
     TH1F EEC_w_p("EEC_w_p", "Energy Energy Correlator", 40, 0, 40);
     
-    TH1F EEC_w_b("EEC_w_b", "Energy Energy Correlator", 100, tryit);
+    TH1F EEC_w_b("EEC_w_b", "Energy Energy Correlator", 40, eecbounds);
     TH1F EEC_w_pb("EEC_w_pb", "Energy Energy Correlator", 40, 0, 40);
 
     TH1F EEC_w_b2("EEC_w_b2", "Energy Energy Correlator", 40, eecbounds);
@@ -163,13 +125,8 @@ int main(int argc, char* argv[]) {
     TH1F EEC_star("EEC_star", "Energy Energy Correlator",nDeltaRBinsEEC, deltaRBinsEEC);
     TH1F Aj_spectrum("Aj_spectrum", "Jet Assymetry spectrum", 60, 0.0, 1.0);
     TH1F JetSpectrum("JetSpectrum", "Jet p{T} spectrum", 60, 0, 60);
-    TH1F JetSpectrumLeading("JetSpectrum leading", "Jet p{T} spectrum leading ", 60, 0, 60);
-    TH1F JetSpectrumSubleading("JetSpectrum subleading", "Jet p{T} spectrum subleading", 60, 0, 60);
     TH2F etaphi_spectrum("etaphi_spectrum", "Eta Phi Distribution", 60 , 0.0, 6.283, 60, -5.0, 5.0);
     TH1F Costheta_spectrum("Costheta_spectrum", "#Deltar", 100, 0., 10.);
-    TH1F q2actual("Pythia q2", "Pythia q2", 100, 0., 200.);
-    TH1F q2est("q2 est", "q2 est", 100, 0., 200.);
-    TH1F q2difference("q2 diff", "q2 diff", 100, 0., 200.);
     
     int dijet_event_counter = 0;
     // Initialize Pythia for 200 GeV pp collision
@@ -193,11 +150,11 @@ int main(int argc, char* argv[]) {
   
     std::vector<fastjet::PseudoJet> event;
     std::vector<fastjet::PseudoJet> charged_event;
-    
+
    // pT cut > .2 GeV
     for (int i = 0; i < pythia.event.size(); ++i) {
     Particle& p = pythia.event[i];
-    
+
     // charged particles for eec
     if (!p.isFinal() || p.pT() < .2 || !p.isCharged() || abs(p.eta()) > 1.1 ) continue;
     charged_event.push_back( PseudoJet(p.px(), p.py(), p.pz(), p.e()));
@@ -233,48 +190,33 @@ int main(int argc, char* argv[]) {
 
     dijet_event_counter++;
     
-    double q2pythia = pythia.info.Q2Fac();
-    double pmq2 = ((jets[0].pt() + jets[1].pt())/2) *  ((jets[0].pt() + jets[1].pt())/2); // average of leading jets pt squared 
-    double q2diff =  q2pythia - pmq2;
-    
-    q2actual.Fill(q2pythia);
-    q2est.Fill(pmq2);
-    q2difference.Fill(q2diff);
-    
     // Jet spectra of dijet events that pass the cut 
      for (size_t i = 0; i < jets.size(); ++i) {
         if (jets[i].pt() > 5) {
         JetSpectrum.Fill(jets[i].pt());
         }
      }
-     float leadingjetpt = jets[0].pt();
-     JetSpectrumLeading.Fill(leadingjetpt);
-     
-     float subleadingjetpt = jets[1].pt();
-     JetSpectrumSubleading.Fill(subleadingjetpt);
-     
-     
     //jet asymmetry  
     float aj = (jets[0].pt()-jets[1].pt()) / (jets[0].pt() + jets[1].pt());
     Aj_spectrum.Fill(aj);
     
-    for (size_t i = 0; i < charged_event.size(); ++i) {
-        for (size_t j = i + 1; j < charged_event.size(); ++j) {
-            float eta = charged_event.at(i).eta();
-            float phi = charged_event.at(i).phi();
+    for (size_t i = 0; i < event.size(); ++i) {
+        for (size_t j = i + 1; j < event.size(); ++j) {
+            float eta = event.at(i).eta();
+            float phi = event.at(i).phi();
             
             etaphi_spectrum.Fill(phi,eta);
-            float eec = charged_event.at(i).pt() * charged_event.at(j).pt();  
+            float eec = event.at(i).pt() * event.at(j).pt();
+            float pmq2 = ((jets[0].pt() + jets[1].pt())/2) *  ((jets[0].pt() + jets[1].pt())/2); // average of leading jets pt squared 
             float ctheta = costheta(charged_event.at(i), charged_event.at(j));
             float z = (1 - ctheta)/2; 
             EEC_w.Fill(z, eec/pmq2);
-            float deltp = deltaphitheta(charged_event.at(i), charged_event.at(j));
-            // work PLEASE! 
-            EEC_w_b.Fill(deltp, eec);
             //float dr = deltaR(event.at(i), event.at(j));
-            //EEC_w.Fill(dr, eec/pmq2); // weighted eec by q2 to compare to e+e-
+            //EEC_w.Fill(dr, eec/pmq2);
+
         
             // filling balanced and unbalanced whole EECs
+            if (aj < 0.0667) EEC_w_b.Fill(z, eec);
             if (aj < 0.1) EEC_w_b2.Fill(z, eec);
             if (aj < 0.15003) EEC_w_b3.Fill(z, eec);
             } 
