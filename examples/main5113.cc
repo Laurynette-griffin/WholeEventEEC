@@ -37,18 +37,10 @@ float costheta(const PseudoJet& p1, const PseudoJet& p2) {
 }
 
 
-float deltaphitheta(const PseudoJet& p1, const PseudoJet& p2) {
-    float eta1 = p1.eta();
-    float eta2 = p2.eta();
-    float theta1 = 2 * std::atan(std::exp(-1*eta1));
-    float theta2 = 2 * std::atan(std::exp(-1*eta2));
-    // to make sure the value of delta theta is not greater than 180 
-    float dtheta = std::acos(std::cos(theta1 - theta2));
-    
+float deltaphi(const PseudoJet& p1, const PseudoJet& p2) {
     float dphi = std::abs(p1.phi() - p2.phi());
     if (dphi > M_PI) dphi = 2 * M_PI - dphi;
-    
-    return std::sqrt(dtheta * dtheta + dphi * dphi);
+    return dphi;
 }
 
 const Int_t nDeltaRBinsEECw = 30;
@@ -69,85 +61,60 @@ Float_t deltaRBinsEEC[nDeltaRBinsEEC + 1];
 
 
 //allows for the .cmnd file to be accepted as an argument 
-int main(int argc, char* argv[]) {
-  // Check if a .cmnd file is provided
-  if (argc < 2) {
-    cerr << "Usage: " << argv[0] << " <config.cmnd>" << endl;
-    return 1;
-  } 
-
-  // Initialize logarithmic binning for whole event (make this a callable function please)
-  for (int iDeltaRw = 0; iDeltaRw <= nDeltaRBinsEECw; iDeltaRw++) {
-    deltaRBinsEECw[iDeltaRw] =
-      (minDeltaREECw + binnerShiftw) * TMath::Exp(iDeltaRw * deltaRlogBinWidthw) - binnerShiftw;
-  }
-
-    std::vector<double> binedges;
-
-    //!   print the values of the bin edges for the left side (1e-4 to 0.5) 
-    for (int iDeltaRw = 0; iDeltaRw <= 30; iDeltaRw++) {
-        binedges.push_back((minDeltaREECw + binnerShiftw) * TMath::Exp(iDeltaRw * deltaRlogBinWidthw) - binnerShiftw);
-    }    
-    
-    //!   print the values of the bin edges for the left side (1e-4 to 0.5) 
-    for (int iDeltaRw = 29; iDeltaRw >= 0; iDeltaRw--) {
-        binedges.push_back(1. - (minDeltaREECw + binnerShiftw) * TMath::Exp(iDeltaRw * deltaRlogBinWidthw) - binnerShiftw);
-    }    
-    
-    for(int i = 0; i < binedges.size(); ++i){
-        cout<<binedges.at(i)<<", ";
-        cout<<endl;}
-
-    for (int iDeltaR = 0; iDeltaR <= nDeltaRBinsEEC; iDeltaR++) {
-        deltaRBinsEEC[iDeltaR] =
-        (minDeltaREEC + binnerShift) * TMath::Exp(iDeltaR * deltaRlogBinWidth) - binnerShift;
+    int main(int argc, char* argv[]) {
+    // Check for required arguments
+    if (argc < 3) {
+        cerr << "Usage: " << argv[0] << " <config.cmnd> <output.root>" << endl;
+        return 1;
     }
 
-    TFile *out = new TFile("../offline/pythia_pp_rhic_15GeV_fullevent_5pthat60_Apr15.root", "RECREATE");
+    string configFile = argv[1];
+    string outputFileName = argv[2];
+    
+    TFile *out = new TFile(outputFileName.c_str(), "RECREATE");
     
     if (!out || out->IsZombie()) {
-        std::cerr << "Error: Could not open output" << std::endl;
+        cerr << "Error: Could not open output file: " << outputFileName << endl;
         return 1;
     }
     
     out->cd();
-
-    std::cout << "created output.root!" << std::endl;
-
+    cout << "Created output file: " << outputFileName << endl;
                                 
-    Double_t tryit[101] =   {1e-05, 0.0444099, 0.0888098, 0.1332097, 0.1776096,
-                            0.22200950000000003, 0.2664094000000001, 0.31080930000000007, 0.35520920000000006, 0.39960910000000005,
-                            0.44400900000000004, 0.4884089000000001, 0.5328088000000001, 0.5772087, 0.6216086000000001,
-                            0.6660085, 0.7104084, 0.7548083000000001, 0.7992082, 0.8436081000000001,
-                            0.888008, 0.9324079000000001, 0.9768078000000001, 1.0212077000000002, 1.0656076000000003,
-                            1.1100075000000003, 1.1544074000000002, 1.1988073000000001, 1.2432072000000003, 1.2876071000000002,
-                            1.3320070000000002, 1.3764069000000003, 1.4208068000000003, 1.4652067000000002, 1.5096066000000004,
-                            1.5540065000000003, 1.5984064000000002, 1.6428063000000004, 1.6872062000000003, 1.7316061000000003,
-                            1.7760060000000002, 1.8204059000000004, 1.8648058000000003, 1.9092057000000002, 1.9536056000000004,
-                            1.9980055000000003, 2.0424054000000003, 2.0868053000000004, 2.1312052000000006, 2.1756051000000003,
-                            2.2200050000000005, 2.2644049, 2.3088048000000003, 2.3532047000000005, 2.3976046,
-                            2.4420045000000004, 2.4864044000000005, 2.5308043000000002, 2.5752042000000004, 2.6196041000000005,
-                            2.6640040000000003, 2.7084039000000004, 2.7528038000000006, 2.7972037000000003, 2.8416036000000005,
-                            2.8860035000000006, 2.9304034000000003, 2.9748033000000005, 3.0192032000000006, 3.0636031000000004,
-                            3.1080030000000005, 3.1524029000000007, 3.1968028000000004, 3.2412027000000005, 3.2856026000000007,
-                            3.3300025000000004, 3.3744024000000006, 3.4188023000000007, 3.4632022000000005, 3.5076021000000006,
-                            3.5520020000000003, 3.5964019000000005, 3.6408018000000006, 3.6852017000000004, 3.7296016000000005,
-                            3.7740015000000007, 3.8184014000000004, 3.8628013000000005, 3.9072012000000007, 3.9516011000000004,
-                            3.9960010000000006, 4.0404009, 4.0848008, 4.1292007, 4.1736006,
-                            4.2180005000000005, 4.262400400000001, 4.3068003, 4.3512002, 4.3956001,
-                            4.44};
-    
-    Double_t eecbounds[29] = {1e-05, 9.829499e-05, 9.661906e-04, 0.00949717, 
+    Double_t eecbounds[61] = {1e-05, 1.43814e-05, 2.06634e-05, 2.96705e-05, 4.25849e-05, 
+                                6.11016e-05, 8.76508e-05, 0.000125717, 0.000180296, 0.000258552, 
+                                0.000370755, 0.000531632, 0.000762296, 0.00109302, 0.00156722, 
+                                0.00224712, 0.00322196, 0.00461969, 0.00662375, 0.00949717, 
                                 0.0136171, 0.0195242, 0.0279938, 0.0401376, 0.0575492, 
                                 0.0825141, 0.118309, 0.169631, 0.243217, 0.348724, 
                                 0.5, 
-                                0.651276, 0.756783, 0.830369, 0.881691, 0.9174859, 
-                                0.9424508, 0.9598624, 0.9720062, 0.9804758, 0.9863829, 
-                                0.99050283, 0.9990338094, 0.9999017, 0.99999};
+                                0.651276, 0.756783, 0.830369, 0.881691, 0.917486, 
+                                0.942451,  0.959862, 0.972006, 0.980476, 0.986383, 
+                                0.990503, 0.993376, 0.99538, 0.996778, 0.997753, 
+                                0.998433, 0.998907, 0.999238, 0.999468, 0.999629, 
+                                0.999741, 0.99982, 0.999874, 0.999912, 0.999939, 
+                                0.999957, 0.99997, 0.999979, 0.999985, 0.99999};
+                                
+    Double_t topi[61] =   {1.00000000e-05, 1.49006082e-05, 2.22028125e-05, 3.30835411e-05,
+                                4.92964884e-05, 7.34547660e-05, 1.09452069e-04, 1.63090240e-04,
+                                2.43014377e-04, 3.62106202e-04, 5.39560265e-04, 8.03977611e-04,
+                                1.19797554e-03, 1.78505642e-03, 2.65984263e-03, 3.96332730e-03,
+                                5.90559873e-03, 8.79970130e-03, 1.31120901e-02, 1.95378118e-02,
+                                2.91125279e-02, 4.33794373e-02, 6.46379999e-02, 9.63145513e-02,
+                                1.43514539e-01, 2.13845393e-01, 3.18642641e-01, 4.74796916e-01,
+                                7.07476283e-01, 1.05418269e+00, 1.57079633e+00, 2.08761365,
+                                2.43432005, 2.66799942, 2.82315369, 2.92795094, 
+                                2.99828179, 3.04548178, 3.07715833, 3.09841689, 
+                                3.11268380, 3.12225852, 3.12868424, 3.13299663, 
+                                3.13589073, 3.13783300, 3.13813649, 3.13981128, 
+                                3.14059876, 3.14099235, 3.14115677, 3.14123423, 
+                                3.14135331, 3.14143323, 3.14148688, 3.14155555, 
+                                3.14156300, 3.14157005, 3.14157413, 3.14157740, 
+                                3.14158265};
 
     // Initialize histogram'
     
-    int bins = 28;
+    int bins = 60;
     TH1::SetDefaultSumw2();
     //TH2::SetDefaultSumw2();
     
@@ -163,6 +130,18 @@ int main(int argc, char* argv[]) {
 
     TH1F EEC_w_high("EEC_w_high", "Energy Energy Correlator", bins, eecbounds);
     TH1F EEC_w_h("EEC_w_h", "Energy Energy Correlator", bins, 0, bins);
+
+    TH1F EEC_w_phi("EEC_w_phi", "Energy Energy Correlator", bins, topi);
+    TH1F EEC_w_pp("EEC_w_pp", "Energy Energy Correlator", bins, 0, bins);
+    
+    TH1F EEC_w_lowphi("EEC_w_lowphi", "Energy Energy Correlator", bins, topi);
+    TH1F EEC_w_lp("EEC_w_lp", "Energy Energy Correlator", bins, 0, bins);
+    
+    TH1F EEC_w_midphi("EEC_w_midphi", "Energy Energy Correlator", bins, topi);
+    TH1F EEC_w_mp("EEC_w_mp", "Energy Energy Correlator", bins, 0, bins);
+    
+    TH1F EEC_w_highphi("EEC_w_hiphi", "Energy Energy Correlator", bins, topi);
+    TH1F EEC_w_hp("EEC_w_hp", "Energy Energy Correlator", bins, 0, bins);
 
     TH1F JetSpectrum("JetSpectrum", "Jet p{T} spectrum", 60, 0, 70);
     TH1F LeadingJetSpectrum("LeadingJetspectrum", "Leading Jet Spectrum", 60 , 0, 70);
@@ -182,7 +161,7 @@ int main(int argc, char* argv[]) {
     fastjet::JetDefinition jet_def(fastjet::antikt_algorithm, jet_radius);
     int dijet_event_counter = 0;
 
-    for (int iEvent = 0; iEvent < 3000000; ++iEvent) { // 2M events (ran March 4th @ 3pm)
+    for (int iEvent = 0; iEvent < 1000000; ++iEvent) { // 2M events (ran March 4th @ 3pm)
         if (!pythia.next()) continue;
     
         
@@ -245,12 +224,18 @@ int main(int argc, char* argv[]) {
                 float ctheta = costheta(charged_event.at(i), charged_event.at(j));
                 float pmq2 = ((jets[0].pt() + jets[1].pt())/2) *  ((jets[0].pt() + jets[1].pt())/2); // average of leading jets pt squared 
                 float z = (1 - ctheta)/2; 
+                float delphi = deltaphi(charged_event.at(i), charged_event.at(j));
                 EEC_w.Fill(z, eec/pmq2);
-                
+                EEC_w_phi.Fill(delphi, eec/pmq2);
                 // work PLEASE! 
-                if (jets[0].pt() < 31.2) EEC_w_low.Fill(z, eec);
-                if (31.2<= jets[0].pt() < 40.7) EEC_w_mid.Fill(z, eec);
-                if (40.7<= jets[0].pt() < 60.8) EEC_w_high.Fill(z, eec);
+                if (jets[0].pt() < 31.2) EEC_w_low.Fill(z, eec/pmq2);
+                if (jets[0].pt() >= 31.2 && jets[0].pt() < 40.7) EEC_w_mid.Fill(z, eec/pmq2);
+                if (jets[0].pt() >= 40.7 && jets[0].pt() < 60.8) EEC_w_high.Fill(z, eec/pmq2);
+                
+                
+                if (jets[1].pt() < 20.9) EEC_w_lowphi.Fill(delphi, eec/pmq2);
+                if (jets[1].pt() >= 20.9 && jets[1].pt() < 27.3) EEC_w_midphi.Fill(delphi, eec/pmq2);
+                if (jets[1].pt() >= 27.3 && jets[1].pt() < 31.2) EEC_w_highphi.Fill(delphi, eec/pmq2);
 
                 } 
             }//!Whole event EEC loop close 

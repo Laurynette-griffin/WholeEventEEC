@@ -22,10 +22,10 @@ void plotmaker4to1() {
     TH1::SetDefaultSumw2();
 
     const char* filenames[4] = {
-        "pythia_pp_rhic_45GeV_fullevent_10pthat60_Apr9_isroff.root",
-        "pythia_pp_rhic_45GeV_fullevent_10pthat60_Apr9_mpioff.root",
-        "pythia_pp_rhic_45GeV_fullevent_10pthat60_Apr9_bothoff.root",
-        "pythia_pp_rhic_15GeV_fullevent_10pthat60_april15_deltheta.root"
+        "pythia_pp_rhic_45GeV_fullevent_44pthat45_isroff_April19.root",
+        "pythia_pp_rhic_45GeV_fullevent_44pthat45_mpioff_April19.root",
+        "pythia_pp_rhic_45GeV_fullevent_44pthat45_bothoff_April19.root",
+        "pythia_pp_rhic_45GeV_fullevent_44pthat45_on_April19.root"
     };
 
     const char* histoname = "EEC_w";
@@ -55,9 +55,9 @@ void plotmaker4to1() {
         
         // Normalize to bin width
         for (int bin = 1; bin <= histos[i]->GetNbinsX(); ++bin) {
-        double width = histos[i]->GetBinWidth(bin);
-        double content = histos[i]->GetBinContent(bin);
-        double error = histos[i]->GetBinError(bin);
+        float width = histos[i]->GetBinWidth(bin);
+        float content = histos[i]->GetBinContent(bin);
+        float error = histos[i]->GetBinError(bin);
             if (width > 0) {
             histos[i]->SetBinContent(bin, content / width);
             histos[i]->SetBinError(bin, error / width);
@@ -66,22 +66,12 @@ void plotmaker4to1() {
         // 
         
         EEC_w_p[i] = new TH1F(Form("EEC_w_p_%d", i), "", 60, 0, 60);
-    
-        EEC_w_p[i]->Fill(3.5, histos[i]->GetBinContent(1));
-        EEC_w_p[i]->SetBinError(3.5, histos[i]->GetBinError(1));
-        EEC_w_p[i]->Fill(10.5, histos[i]->GetBinContent(2)); 
-        EEC_w_p[i]->Fill(16.5, histos[i]->GetBinContent(3));
-        EEC_w_p[i]->Fill(44, histos[i]->GetBinContent(26));
-        EEC_w_p[i]->Fill(50, histos[i]->GetBinContent(27));
-        EEC_w_p[i]->Fill(56.5, histos[i]->GetBinContent(28));
                 
-        for (int bin = 20; bin <= 41; ++bin) {
-            int origbin = bin - 16 ;
-            EEC_w_p[i]->SetBinContent(bin, histos[i]->GetBinContent(origbin));
-            EEC_w_p[i]->SetBinError(bin, histos[i]->GetBinError(origbin));
+        for (int bin = 1; bin <= 60; ++bin) {
+            EEC_w_p[i]->SetBinContent(bin, histos[i]->GetBinContent(bin));
+            EEC_w_p[i]->SetBinError(bin, histos[i]->GetBinError(bin));
             }
     
-        
         // Normalize to unit integral
         double integral = EEC_w_p[i]->Integral("width");  // use width-aware integral
         if (integral > 0) EEC_w_p[i]->Scale(1.0 / integral);
@@ -96,22 +86,31 @@ void plotmaker4to1() {
     EEC_w_p[3]->SetLineColor(kMagenta);
 
     EEC_w_p[0]->SetMarkerStyle(20);
+    EEC_w_p[0]->SetMarkerColor(kRed);
+    
     EEC_w_p[1]->SetMarkerStyle(21);
+    EEC_w_p[1]->SetMarkerColor(kBlue);
+    
     EEC_w_p[2]->SetMarkerStyle(22);
+    EEC_w_p[2]->SetMarkerColor(kGreen + 2);
+    
     EEC_w_p[3]->SetMarkerStyle(23);
+    EEC_w_p[3]->SetMarkerColor(kMagenta);
+    
     
     EEC_w_p[0]->SetMarkerSize(0.5);
-    EEC_w_p[0]->SetMinimum(1e-5);
+    EEC_w_p[0]->SetMinimum(1e-6);
     EEC_w_p[0]->SetMaximum(1);
     EEC_w_p[0]->Draw("P");
     EEC_w_p[0]->GetXaxis()->SetLabelOffset(999);
     EEC_w_p[0]->GetXaxis()->SetTitleOffset(999);
     EEC_w_p[0]->GetXaxis()->SetTickLength(0);
+    EEC_w_p[0]->GetYaxis()->SetTitle("1/#frac{jet p_{T, leading} + jet p_{T, subleading}}{2}}^2 EEC ");
     EEC_w_p[0]->SetStats(0);
     
     for (int i = 1; i < 4; ++i) {
         EEC_w_p[i]->SetMarkerSize(0.5);
-        EEC_w_p[i]->SetMinimum(1e-5);
+        EEC_w_p[i]->SetMinimum(1e-6);
         EEC_w_p[i]->SetMaximum(1);
         EEC_w_p[i]->Draw("P SAME");
         EEC_w_p[i]->GetXaxis()->SetLabelOffset(999);
@@ -141,7 +140,9 @@ void plotmaker4to1() {
     
     // Text
     drawText("0.5", 0.4875, .06, 17 );
-    drawText("z = (1 - cos(#theta))/2", 0.8, .025, 18);
+    //drawText("z = (1 - cos(#theta))/2", 0.8, .025, 18);
+    //drawText("#Delta#phi", 0.8, .025, 18);
+    drawText("z = (1 - cos(#theta))/2", 0.8, .025, 18 );
     drawText("p+p #sqrt{s} = 200 GeV", 0.40, 0.85, 12); 
     drawText("anti-k_{T} R_{jet} = 0.4 |#eta < 0.7|", 0.40, 0.81, 12);
     drawText("44.75 GeV < #hat{p}_{T} < 45.25 GeV", 0.40, 0.77, 12);
@@ -151,11 +152,12 @@ void plotmaker4to1() {
     
     // Legend
     TLegend* legend = new TLegend(0.7, 0.15, 0.9, 0.35);
-    legend->AddEntry(EEC_w_p[0], "ISR off ", "l");
-    legend->AddEntry(EEC_w_p[1], "MPI off", "l");
-    legend->AddEntry(EEC_w_p[2], "ISR & MPI off", "l");
-    legend->AddEntry(EEC_w_p[3], "ISR & MPI on", "l");
+    legend->AddEntry(EEC_w_p[3], "ISR on MPI on", "pl");
+    legend->AddEntry(EEC_w_p[1], "ISR on MPI off", "pl");
+    legend->AddEntry(EEC_w_p[0], "ISR off MPI on ", "pl");
+    legend->AddEntry(EEC_w_p[2], "ISR off MPI off", "pl");
+
     legend->Draw();
 
-    canvas1->SaveAs("MPIISRdifference.png");
+    canvas1->SaveAs("MPIISRdifferenceApril21.png");
 }

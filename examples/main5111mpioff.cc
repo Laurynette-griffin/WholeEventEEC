@@ -35,6 +35,19 @@ float costheta(const PseudoJet& p1, const PseudoJet& p2) {
     return (dotprod / (normp1 * normp2));
 }
 
+
+float deltaphi(const PseudoJet& p1, const PseudoJet& p2) {
+    
+    float dphi = std::abs(p1.phi() - p2.phi());
+    if (dphi > M_PI) dphi = 2 * M_PI - dphi;
+    
+    return dphi;
+}
+
+float deltaeta(const PseudoJet& p1, const PseudoJet& p2) {
+    float deta = p1.eta() - p2.eta();
+    return deta;
+}
 const Int_t nDeltaRBinsEECw = 30;
 const Float_t minDeltaREECw = 1e-2; // Avoid log(0) issue
 const Float_t maxDeltaREECw = 1.67;
@@ -54,49 +67,46 @@ Float_t deltaRBinsEEC[nDeltaRBinsEEC + 1];
 
 //allows for the .cmnd file to be accepted as an argument 
 int main(int argc, char* argv[]) {
-// Check if a .cmnd file is provided
-    if (argc < 2) {
-        cerr << "Usage: " << argv[0] << " <config.cmnd>" << endl;
+    // Check for required arguments
+    if (argc < 3) {
+        cerr << "Usage: " << argv[0] << " <config.cmnd> <output.root>" << endl;
         return 1;
-    } 
-    
-    // Initialize logarithmic binning for whole event (make this a callable function please)
-    for (int iDeltaRw = 0; iDeltaRw <= nDeltaRBinsEECw; iDeltaRw++) {
-        deltaRBinsEECw[iDeltaRw] = (minDeltaREECw + binnerShiftw) * TMath::Exp(iDeltaRw * deltaRlogBinWidthw) - binnerShiftw;
     }
+
+    string configFile = argv[1];
+    string outputFileName = argv[2];
     
-    std::vector<double> binedges;
-    
-    //!   print the values of the bin edges for the left side (1e-4 to 0.5) 
-    for (int iDeltaRw = 0; iDeltaRw <= 50; iDeltaRw++) {
-        binedges.push_back((minDeltaREECw + binnerShiftw) * TMath::Exp(iDeltaRw * deltaRlogBinWidthw) - binnerShiftw);
-    }    
-    
-    //!   print the values of the bin edges for the left side (1e-4 to 0.5) 
-    for (int iDeltaRw = 29; iDeltaRw >= 0; iDeltaRw--) {
-        binedges.push_back(3.38 - (minDeltaREECw + binnerShiftw) * TMath::Exp(iDeltaRw * deltaRlogBinWidthw) - binnerShiftw);
-    }    
-    
-    for(int i = 0; i < binedges.size(); ++i){ 
-        cout<<binedges.at(i)<<", " <<endl;
-    }
-    
-    for (int iDeltaR = 0; iDeltaR <= nDeltaRBinsEEC; iDeltaR++) {
-        deltaRBinsEEC[iDeltaR] = (minDeltaREEC + binnerShift) * TMath::Exp(iDeltaR * deltaRlogBinWidth) - binnerShift;
-    }
-    
-    TFile *out = new TFile("../offline/pythia_pp_rhic_45GeV_fullevent_10pthat60_Apr9_mpioff.root", "RECREATE");
+    // Create output ROOT file
+    TFile *out = new TFile(outputFileName.c_str(), "RECREATE");
     
     if (!out || out->IsZombie()) {
-    std::cerr << "Error: Could not open output" << std::endl;
-    return 1;
+        cerr << "Error: Could not open output file: " << outputFileName << endl;
+        return 1;
     }
-    
+
     out->cd();
+    cout << "Created output file: " << outputFileName << endl;
     
-    std::cout << "created main511.root!" << std::endl;
+    Double_t topi[61] =   {1.00000000e-05, 1.49006082e-05, 2.22028125e-05, 3.30835411e-05,
+                                4.92964884e-05, 7.34547660e-05, 1.09452069e-04, 1.63090240e-04,
+                                2.43014377e-04, 3.62106202e-04, 5.39560265e-04, 8.03977611e-04,
+                                1.19797554e-03, 1.78505642e-03, 2.65984263e-03, 3.96332730e-03,
+                                5.90559873e-03, 8.79970130e-03, 1.31120901e-02, 1.95378118e-02,
+                                2.91125279e-02, 4.33794373e-02, 6.46379999e-02, 9.63145513e-02,
+                                1.43514539e-01, 2.13845393e-01, 3.18642641e-01, 4.74796916e-01,
+                                7.07476283e-01, 1.05418269e+00, 1.57079633e+00, 2.08761365,
+                                2.43432005, 2.66799942, 2.82315369, 2.92795094, 
+                                2.99828179, 3.04548178, 3.07715833, 3.09841689, 
+                                3.11268380, 3.12225852, 3.12868424, 3.13299663, 
+                                3.13589073, 3.13783300, 3.13813649, 3.13981128, 
+                                3.14059876, 3.14099235, 3.14115677, 3.14123423, 
+                                3.14135331, 3.14143323, 3.14148688, 3.14155555, 
+                                3.14156300, 3.14157005, 3.14157413, 3.14157740, 
+                                3.14158265};
     
-    Double_t eecbounds[41] = { 0.00001, 0.00004784,  0.00022988, 0.00109302, 0.00156722, 
+    Double_t eecbounds[61] = {1e-05, 1.43814e-05, 2.06634e-05, 2.96705e-05, 4.25849e-05, 
+                                6.11016e-05, 8.76508e-05, 0.000125717, 0.000180296, 0.000258552, 
+                                0.000370755, 0.000531632, 0.000762296, 0.00109302, 0.00156722, 
                                 0.00224712, 0.00322196, 0.00461969, 0.00662375, 0.00949717, 
                                 0.0136171, 0.0195242, 0.0279938, 0.0401376, 0.0575492, 
                                 0.0825141, 0.118309, 0.169631, 0.243217, 0.348724, 
@@ -104,23 +114,27 @@ int main(int argc, char* argv[]) {
                                 0.651276, 0.756783, 0.830369, 0.881691, 0.917486, 
                                 0.942451,  0.959862, 0.972006, 0.980476, 0.986383, 
                                 0.990503, 0.993376, 0.99538, 0.996778, 0.997753, 
-                                0.998433, 0.998907, 0.99977012, 0.99995216, 0.99999};
-    // Initialize histogram
+                                0.998433, 0.998907, 0.999238, 0.999468, 0.999629, 
+                                0.999741, 0.99982, 0.999874, 0.999912, 0.999939, 
+                                0.999957, 0.99997, 0.999979, 0.999985, 0.99999};
+    // Initialize histogram'
+    
+    int bins = 60;
     TH1::SetDefaultSumw2();
     TH2::SetDefaultSumw2();
     
     
-    TH1F EEC_w("EEC_w", "Energy Energy Correlator", 40, eecbounds);
-    TH1F EEC_w_p("EEC_w_p", "Energy Energy Correlator", 40, 0, 40);
+    TH1F EEC_w("EEC_w", "Energy Energy Correlator", bins, eecbounds);
+    TH1F EEC_w_p("EEC_w_p", "Energy Energy Correlator", bins, 0, bins);
     
-    TH1F EEC_w_b("EEC_w_b", "Energy Energy Correlator", 40, eecbounds);
-    TH1F EEC_w_pb("EEC_w_pb", "Energy Energy Correlator", 40, 0, 40);
+    TH1F EEC_w_b("EEC_w_b", "Energy Energy Correlator", bins, topi);
+    TH1F EEC_w_pb("EEC_w_pb", "Energy Energy Correlator", bins, 0, bins);
 
-    TH1F EEC_w_b2("EEC_w_b2", "Energy Energy Correlator", 40, eecbounds);
-    TH1F EEC_w_pb2("EEC_w_pb2", "Energy Energy Correlator", 40, 0, 40);
+    TH1F EEC_w_b2("EEC_w_b2", "Energy Energy Correlator", bins, eecbounds);
+    TH1F EEC_w_pb2("EEC_w_pb2", "Energy Energy Correlator", bins, 0, bins);
 
-    TH1F EEC_w_b3("EEC_w_b3", "Energy Energy Correlator", 40, eecbounds);
-    TH1F EEC_w_pb3("EEC_w_pb3", "Energy Energy Correlator", 40, 0, 40);
+    TH1F EEC_w_b3("EEC_w_b3", "Energy Energy Correlator", bins, eecbounds);
+    TH1F EEC_w_pb3("EEC_w_pb3", "Energy Energy Correlator", bins, 0, bins);
     
     TH1F EEC_star("EEC_star", "Energy Energy Correlator",nDeltaRBinsEEC, deltaRBinsEEC);
     TH1F Aj_spectrum("Aj_spectrum", "Jet Assymetry spectrum", 60, 0.0, 1.0);
@@ -145,7 +159,7 @@ int main(int argc, char* argv[]) {
     Sphericity sph;
     //trying the sphericity cut in pp has been done before
     
-    for (int iEvent = 0; iEvent < 1000000; ++iEvent) { // 10000 events for now
+    for (int iEvent = 0; iEvent < 5000000; ++iEvent) { // 10000 events for now
     if (!pythia.next()) continue;
   
     std::vector<fastjet::PseudoJet> event;
@@ -200,27 +214,26 @@ int main(int argc, char* argv[]) {
     float aj = (jets[0].pt()-jets[1].pt()) / (jets[0].pt() + jets[1].pt());
     Aj_spectrum.Fill(aj);
     
-    for (size_t i = 0; i < event.size(); ++i) {
-        for (size_t j = i + 1; j < event.size(); ++j) {
-            float eta = event.at(i).eta();
-            float phi = event.at(i).phi();
+        for (size_t i = 0; i < charged_event.size(); ++i) {
+        for (size_t j = i + 1; j < charged_event.size(); ++j) {
+            float eta = charged_event.at(i).eta();
+            float phi = charged_event.at(i).phi();
             
             etaphi_spectrum.Fill(phi,eta);
-            float eec = event.at(i).pt() * event.at(j).pt();
+            float eec = charged_event.at(i).pt() * charged_event.at(j).pt();
             float pmq2 = ((jets[0].pt() + jets[1].pt())/2) *  ((jets[0].pt() + jets[1].pt())/2); // average of leading jets pt squared 
             float ctheta = costheta(charged_event.at(i), charged_event.at(j));
             float z = (1 - ctheta)/2; 
+            float delphi = deltaphi(charged_event.at(i), charged_event.at(j));
             EEC_w.Fill(z, eec/pmq2);
-            //float dr = deltaR(event.at(i), event.at(j));
-            //EEC_w.Fill(dr, eec/pmq2);
-
-        
+            // work PLEASE! 
+            EEC_w_b.Fill(delphi, eec);
+            float deleta = deltaphi(charged_event.at(i), charged_event.at(j));
             // filling balanced and unbalanced whole EECs
-            if (aj < 0.0667) EEC_w_b.Fill(z, eec);
-            if (aj < 0.1) EEC_w_b2.Fill(z, eec);
+            EEC_w_b2.Fill(deleta, eec);
             if (aj < 0.15003) EEC_w_b3.Fill(z, eec);
             } 
-        }//!Whole event EEC loop close 
+        }//!Whole event EEC loop close  
 
 }//! event loop 
 

@@ -17,12 +17,11 @@ void drawText(const char *text, float xp, float yp, int size){
   tex->Draw();
 }
 
-void plotmaker_eec15() {
+void plotmaker3to1pt2() {
     
     TH1::SetDefaultSumw2();
-    //TFile* fin = TFile::Open("../offline/pythia_pp_rhic_15GeV_fullevent_10pthat60_March3_mpioff.root"); // mpi off
-    TFile* fin = TFile::Open("../outfiles/pythia_pp_rhic_8GeV_fullevent_5pthat60_April18.root");  
-    //TFile* fin = TFile::Open("../offline/pythia_pp_rhic_15GeV_fullevent_10pthat60_March3_hadoff.root");
+    TFile* fin = TFile::Open("../outfiles/pythia_pp_rhic_fullevent_pt2_thermal_1mill_2025-05-05_1.root"); // 1 million events? 
+    //TFile* fin = TFile::Open("pythia_pp_rhic_fullevent_pt2_on_April23_10mill.root");
     
     TH1F* histEECwhole = (TH1F*)fin->Get("EEC_w");
     
@@ -71,7 +70,7 @@ TH1F* histo1 = (TH1F*)histEECwhole->Clone("histo1");
 for (int bin = 1; bin <= histo1->GetNbinsX(); ++bin) {
         float width = histo1->GetBinWidth(bin);
         float content = histo1->GetBinContent(bin);
-        float error = histo1->GetBinContent(bin);
+        float error = histo1->GetBinError(bin);
         histo1->SetBinContent(bin, content / width);
         histo1->SetBinError(bin, error / width);
     }
@@ -92,6 +91,7 @@ for (int bin = 1; bin <= histo1->GetNbinsX(); ++bin) {
     EEC_w_p->GetXaxis()->SetTitleOffset(999);
     EEC_w_p->GetXaxis()->SetTickLength(0);
     EEC_w_p->SetStats(0);
+    EEC_w_p->GetYaxis()->SetTitle("1/#frac{jet p_{T, leading} + jet p_{T, subleading}}{2}}^2 EEC ");
     
     axis1->Draw();
     axis2->Draw();
@@ -100,12 +100,10 @@ for (int bin = 1; bin <= histo1->GetNbinsX(); ++bin) {
     drawText("z = (1 - cos(#theta))/2", 0.8, .025, 18 );
     drawText("p+p #srqt{s} = 200 GeV", 0.20, 0.87, 18);
     drawText("anti-k_{T} R_{jet} = 0.4 |#eta < 0.7|", 0.20, 0.83, 18);
-    //drawText("jet p_{T1} >= 20.9 GeV", 0.20, 0.79, 18);
     drawText("31.2 Gev < jet p_{T1} >= 40.7 GeV", 0.20, 0.79, 18);
     drawText("9.4 GeV < jet p_{T2} < 20.9 GeV", 0.20, 0.75, 18);
-    //drawText("jet p_{T1} >= 9.4 GeV", 0.20, 0.75, 18);
     drawText("charged constituent p_{T} > .2 GeV", 0.20, .71, 18 );
-    canvas1->SaveAs("WholeEventEECallApril17.png");
+    //canvas1->SaveAs("WholeEventEECallApril21.png");
     
     canvas2->cd();
     canvas2->SetLogy();
@@ -114,7 +112,7 @@ for (int bin = 1; bin <= histo1->GetNbinsX(); ++bin) {
     for (int bin = 1; bin <= histo2->GetNbinsX(); ++bin) {
         float width = histo2->GetBinWidth(bin);
         float content = histo2->GetBinContent(bin);
-        float error = histo2->GetBinContent(bin);
+        float error = histo2->GetBinError(bin);
         histo2->SetBinContent(bin, content / width);
         histo2->SetBinError(bin, error);
     }
@@ -133,6 +131,7 @@ for (int bin = 1; bin <= histo1->GetNbinsX(); ++bin) {
     EEC_w_h->GetXaxis()->SetLabelOffset(999);
     EEC_w_h->GetXaxis()->SetTitleOffset(999);
     EEC_w_h->GetXaxis()->SetTickLength(0);
+    EEC_w_h->GetYaxis()->SetTitle("1/#frac{jet p_{T, leading} + jet p_{T, subleading}}{2}}^2 EEC ");
     
     axis1->Draw();
     axis2->Draw();
@@ -141,12 +140,10 @@ for (int bin = 1; bin <= histo1->GetNbinsX(); ++bin) {
     drawText("z = (1 - cos(#theta))/2", 0.8, .025, 18 );
     drawText("p+p #srqt{s} = 200 GeV", 0.20, 0.87, 18);
     drawText("anti-k_{T} R_{jet} = 0.4 |#eta < 0.7|", 0.20, 0.83, 18);
-   // drawText("40.7 Gev < jet p_{T1} >= 60.8 GeV", 0.20, 0.79, 18);
-    //drawText("jet p_{T2} >= 9.4 GeV", 0.20, 0.75, 18);
     drawText("31.2 Gev < jet p_{T1} <= 40.7 GeV", 0.20, 0.79, 18);
     drawText("27.3 GeV <= jet p_{T2} < 31.2 GeV", 0.20, 0.75, 18);
     drawText("charged constituent p_{T} > .2 GeV", 0.20, .71, 18 );
-    canvas2->SaveAs("WholeEventEEClowpthighApril17.png");
+    //canvas2->SaveAs("WholeEventEEClowpthighApril21.png");
     
     canvas3->cd();
     canvas3->SetLogy();
@@ -156,7 +153,7 @@ for (int bin = 1; bin <= histo1->GetNbinsX(); ++bin) {
     for (int bin = 1; bin <= histo3->GetNbinsX(); ++bin) {
         float width = histo3->GetBinWidth(bin);
         float content = histo3->GetBinContent(bin);
-        float error = histo3->GetBinContent(bin);
+        float error = histo3->GetBinError(bin);
         histo3->SetBinContent(bin, content / width);
         histo3->SetBinError(bin, error);
     }
@@ -176,6 +173,7 @@ for (int bin = 1; bin <= histo1->GetNbinsX(); ++bin) {
     EEC_w_m->GetXaxis()->SetLabelOffset(999);
     EEC_w_m->GetXaxis()->SetTitleOffset(999);
     EEC_w_m->GetXaxis()->SetTickLength(0);
+    EEC_w_m->GetYaxis()->SetTitle("1/#frac{jet p_{T, leading} + jet p_{T, subleading}}{2}}^2 EEC ");
     
     axis1->Draw();
     axis2->Draw();
@@ -184,12 +182,10 @@ for (int bin = 1; bin <= histo1->GetNbinsX(); ++bin) {
     drawText("z = (1 - cos(#theta))/2", 0.8, .025, 18 );
     drawText("p+p #srqt{s} = 200 GeV", 0.20, 0.87, 18);
     drawText("anti-k_{T} R_{jet} = 0.4 |#eta < 0.7|", 0.20, 0.83, 18);
-    //drawText("31.2 Gev < jet p_{T1} >= 40.7 GeV", 0.20, 0.79, 18);
-    //drawText("jet p_{T2} >= 9.4 GeV", 0.20, 0.75, 18);
     drawText("31.2 Gev < jet p_{T1} <= 40.7 GeV", 0.20, 0.79, 18);
     drawText("20.9 GeV <= jet p_{T2} < 27.3 GeV", 0.20, 0.75, 18);
     drawText("charged constituent p_{T} > .2 GeV", 0.20, .71, 18 );
-    canvas3->SaveAs("WholeEventEEClowptmidApril17.png");
+    //canvas3->SaveAs("WholeEventEEClowptmidApril21.png");
     
     canvas4->cd();
     canvas4->SetLogy();
@@ -199,9 +195,9 @@ for (int bin = 1; bin <= histo1->GetNbinsX(); ++bin) {
     for (int bin = 1; bin <= histo4->GetNbinsX(); ++bin) {
         float width = histo4->GetBinWidth(bin);
         float content = histo4->GetBinContent(bin);
-        float error = histo4->GetBinContent(bin);
+        float error = histo4->GetBinError(bin);
         histo4->SetBinContent(bin, content / width);
-        histo4->SetBinError(bin, error);
+        histo4->SetBinError(bin, error / width);
     }
     
     TH1F* EEC_w_l = new TH1F("EEC_w_l", "WEEC", 60, 0, 60);
@@ -218,20 +214,19 @@ for (int bin = 1; bin <= histo1->GetNbinsX(); ++bin) {
     EEC_w_l->GetXaxis()->SetLabelOffset(999);
     EEC_w_l->GetXaxis()->SetTitleOffset(999);
     EEC_w_l->GetXaxis()->SetTickLength(0);
+    EEC_w_l->GetYaxis()->SetTitle("1/#frac{jet p_{T, leading} + jet p_{T, subleading}}{2}}^2 EEC ");
     
     axis1->Draw();
     axis2->Draw();
     
-    drawText("0.5", 0.4875, .06, 17 );
-    drawText("z = (1 - cos(#theta))/2", 0.8, .025, 18 );
+    //drawText("0.5", 0.4875, .06, 17 );
+    //drawText("z = (1 - cos(#theta))/2", 0.8, .025, 18 );
     drawText("p+p #srqt{s} = 200 GeV", 0.20, 0.87, 18);
     drawText("anti-k_{T} R_{jet} = 0.4 |#eta < 0.7|", 0.20, 0.83, 18);
-    //drawText("20.9 Gev < jet p_{T1} >= 31.2 GeV", 0.20, 0.79, 18);
-    //drawText("jet p_{T2} >= 9.4 GeV", 0.20, 0.75, 18);
     drawText("31.2 Gev < jet p_{T1} <= 40.7 GeV", 0.20, 0.79, 18);
     drawText("9.4 Gev < jet p_{T2} < 20.9 GeV", 0.20, 0.75, 18);
     drawText("charged constituent p_{T} > .2 GeV", 0.20, .71, 18 );
-    canvas4->SaveAs("WholeEventEEClowptlowApril17.png");
+    //canvas4->SaveAs("WholeEventEEClowptlowApril21.png");
     
     canvas5->cd();
     canvas5->SetLogy();
@@ -239,6 +234,7 @@ for (int bin = 1; bin <= histo1->GetNbinsX(); ++bin) {
     EEC_w_l ->SetLineColor(kRed);
     EEC_w_m->SetLineColor(kBlue);
     EEC_w_h->SetLineColor(kMagenta);
+    EEC_w_p->SetLineColor(kGreen+2);
 
     EEC_w_l->SetMarkerStyle(20);
     EEC_w_l->SetMarkerColor(kRed);
@@ -249,33 +245,41 @@ for (int bin = 1; bin <= histo1->GetNbinsX(); ++bin) {
     EEC_w_h->SetMarkerStyle(23);
     EEC_w_h->SetMarkerColor(kMagenta);
 
+    EEC_w_p->SetMarkerStyle(24);
+    EEC_w_p->SetMarkerColor(kGreen+2);
+
     EEC_w_l->SetMarkerSize(0.5);
     EEC_w_m->SetMarkerSize(0.5);
     EEC_w_h->SetMarkerSize(0.5);
+    EEC_w_p->SetMarkerSize(0.5);
     
-    EEC_w_l->SetMinimum(1e-5);
-    EEC_w_l->SetMaximum(1);
+    EEC_w_l->SetMinimum(1e-4);
+    EEC_w_l->SetMaximum(.5);
     
     EEC_w_l->Draw("P E1");
     EEC_w_m->Draw("P E1 SAME");
     EEC_w_h->Draw("P E1 SAME");
+    //EEC_w_p->Draw("P E1 SAME");
     
     axis1->Draw();
     axis2->Draw();
     
     drawText("0.5", 0.4875, .06, 17 );
-    drawText("z = (1 - cos(#theta))/2", 0.8, .025, 18 );
-    drawText("p+p #srqt{s} = 200 GeV", 0.20, 0.87, 18);
-    drawText("anti-k_{T} R_{jet} = 0.4 |#eta < 0.7|", 0.20, 0.83, 18);
-    drawText("31.2 Gev < jet p_{T1} >= 40.7 GeV", 0.20, 0.79, 18);
-    drawText("charged constituent p_{T} > .2 GeV", 0.20, .75, 18 );
+    drawText("z = (1 - cos(#theta))/2", 0.8, .025, 16);
+    //drawText("#Delta#Phi", 0.8, .025, 18 );
+    drawText("p+p #sqrt{s} = 200 GeV", 0.20, 0.88, 16);
+    drawText("anti-k_{T} R_{jet} = 0.4 |#eta < 0.7|", 0.20, 0.84, 16);
+    drawText("31.2 Gev < jet p_{T1} >= 40.7 GeV", 0.20, 0.80, 16);
+    drawText("charged constituent p_{T} > .2 GeV", 0.20, .76, 16 );
+    drawText("#Delta#Phi > 3/4 ", 0.20, .72, 16 );
     
     TLegend* legend = new TLegend(0.6, 0.12, 0.9, 0.35);
+    //legend->AddEntry(EEC_w_p, "9.4 Gev < jet p_{T2} < 31.2 GeV", "pl");
     legend->AddEntry(EEC_w_l, "9.4 Gev < jet p_{T2} < 20.9 GeV", "pl");
     legend->AddEntry(EEC_w_m, "20.9 GeV <= jet p_{T2} < 27.3 GeV", "pl");
     legend->AddEntry(EEC_w_h, "27.3 GeV <= jet p_{T2} < 31.2 GeV", "pl");
 
     legend->Draw();
 
-    canvas5->SaveAs("LowptdijetwholeeventcomparisonApril19.png");
+    canvas5->SaveAs("LowptdijetwholeeventcomparisonMay7.png");
 }
