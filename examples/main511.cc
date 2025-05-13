@@ -42,7 +42,6 @@ float costheta(const PseudoJet& p1, const PseudoJet& p2) {
 float deltaphi(const PseudoJet& p1, const PseudoJet& p2) {
     float dphi = std::abs(p1.phi() - p2.phi());
     if (dphi > M_PI) dphi = 2 * M_PI - dphi;
-    
     return dphi;
 }
 
@@ -72,7 +71,7 @@ vector<PseudoJet> thermalGen(int nParticles = 1500){
     
     double mass = 0.13957; //charged pions 
     
-    TRandom3 *r = new TRandom3();
+    TRandom3 *r = new TRandom3(0); // be sure to set seed to 0 which is a time dependant seed if you pass nothing it is a default so each one is the same
     
     vector<PseudoJet> thermalParticles;
     for(int i=0; i<nParticles; i++)
@@ -81,7 +80,7 @@ vector<PseudoJet> thermalGen(int nParticles = 1500){
         	
         	double eta = 2.2*r->Rndm() - 1.1; 
         	double phi = 2.0*TMath::Pi()*r->Rndm() - TMath::Pi();
-        
+            
         	double p = pT*cosh(eta);
         	double pz = pT*sinh(eta);
         
@@ -164,9 +163,9 @@ int main(int argc, char* argv[]) {
     
     TH1F EEC_w("EEC_w", "Energy Energy Correlator", bins, eecbounds);
     TH1F EEC_w_p("EEC_w_p", "Energy Energy Correlator", bins, 0, bins);
-    
-    TH1F EEC_w("EEC_t", "Energy Energy Correlator", bins, eecbounds);
-    TH1F EEC_w("EEC_t_p", "Energy Energy Correlator", bins, 0, bins);
+     // thermal stuff 
+    TH1F EEC_t("EEC_t", "Energy Energy Correlator", bins, eecbounds);
+    TH1F EEC_t_p("EEC_t_p", "Energy Energy Correlator", bins, 0, bins);
     
     TH1F EEC_w_low("EEC_w_low", "Energy Energy Correlator", bins, eecbounds);
     TH1F EEC_w_l("EEC_w_l", "Energy Energy Correlator", bins, 0, bins);
@@ -176,6 +175,9 @@ int main(int argc, char* argv[]) {
 
     TH1F EEC_w_high("EEC_w_high", "Energy Energy Correlator", bins, eecbounds);
     TH1F EEC_w_h("EEC_w_h", "Energy Energy Correlator", bins, 0, bins);
+        
+    TH1F EEC_td("EEC_td", "Energy Energy Correlator", bins, topi);
+    TH1F EEC_td_p("EEC_td_p", "Energy Energy Correlator", bins, 0, bins);
     
     TH1F EEC_w_phi("EEC_w_phi", "Energy Energy Correlator", bins, topi);
     TH1F EEC_w_pp("EEC_w_pp", "Energy Energy Correlator", bins, 0, bins);
@@ -189,12 +191,16 @@ int main(int argc, char* argv[]) {
     TH1F EEC_w_highphi("EEC_w_hiphi", "Energy Energy Correlator", bins, topi);
     TH1F EEC_w_hp("EEC_w_hp", "Energy Energy Correlator", bins, 0, bins);
 
-    TH1F JetSpectrum("JetSpectrum", "Jet p{T} spectrum", 60, 0, 70);
-    TH1F LeadingJetSpectrum("LeadingJetspectrum", "Leading Jet Spectrum", 60 , 0, 70);
-    TH1F SubleadingJetSpectrum("SubleadingJetSpectrum", "Subleading Jet Spectrum ", 60, 0, 70);
+    TH1F JetSpectrum("JetSpectrum", "Jet p{T} spectrum", 70, 0, 70);
+    TH1F LeadingJetSpectrum("LeadingJetspectrum", "Leading Jet Spectrum", 70 , 0, 70);
+    TH1F SubleadingJetSpectrum("SubleadingJetSpectrum", "Subleading Jet Spectrum ", 70, 0, 70);
+    TH1F ThermalPhi("ThermalPhi", "phi distrubution", 31, 0, 2*TMath::Pi());
+    TH1F Deltaphi("Deltaphi", "linear del phi", 31, 0, TMath::Pi());
+    TH2F etavphit("hEtaPhi", "Eta vs Phi;#eta;#phi",22, -1.1, 1.1, 32, -2*TMath::Pi(), 2*TMath::Pi()); 
     
-    TH1F truthq2("truthq2", "Pythia q2", 60, 0, 70);
-    TH1F pmq2h("pmq2", "Average leading and subleading jet p{T}", 60, 0, 70);
+    // reco vs truth q2
+    TH2F q2vspmq2("comparisonpmq2", " Q^2 vs Average leading and subleading jet pt^2", 10, 0, 1000, 10, 0, 1000);
+    TH2F qvspmq("comparisonpthat", "pthat^2 vs Average leading and subleading jet pt^2", 12, 0, 60, 10, 0, 60);
     // Initialize Pythia for 200 GeV pp collision
     Pythia pythia;
     
@@ -209,7 +215,7 @@ int main(int argc, char* argv[]) {
     fastjet::JetDefinition jet_def(fastjet::antikt_algorithm, jet_radius);
     int dijet_event_counter = 0;
 
-    for (int iEvent = 0; iEvent < 1000000; ++iEvent) { // 2M events (ran March 4th @ 3pm)
+    for (int iEvent = 0; iEvent < 1000000; ++iEvent) { // 1M events
         if (!pythia.next()) continue;
     
         
@@ -221,8 +227,8 @@ int main(int argc, char* argv[]) {
         Particle& p = pythia.event[i];
     
         // charged particles for eec
-        if (!p.isFinal() || p.pT() < .2 || !p.isCharged() || abs(p.eta()) > 1.1 ) continue;
-        charged_event.push_back( PseudoJet(p.px(), p.py(), p.pz(), p.e()));
+        //if (!p.isFinal() || p.pT() < .2 || !p.isCharged() || abs(p.eta()) > 1.1 ) continue;
+        //charged_event.push_back( PseudoJet(p.px(), p.py(), p.pz(), p.e()));
     
         
         // all particles for jet finding 
@@ -237,13 +243,6 @@ int main(int argc, char* argv[]) {
         // Require atleast two jets
         if (jets.size() < 2) continue;
         
-        float pmq2f = ((jets[0].pt() + jets[1].pt())/2) *  ((jets[0].pt() + jets[1].pt())/2);
-        pmq2h.Fill(pmq2f);
-        
-        float q2 = pythia.info.Q2Ren();
-        truthq2.Fill(q2);
-        
-        
         //erases (remove if statement) detector acceptance cut jets 
         jets.erase( std::remove_if(jets.begin(), jets.end(),
             [](const fastjet::PseudoJet& jet) { 
@@ -254,13 +253,31 @@ int main(int argc, char* argv[]) {
         if(jets[0].pt() < 31.2  || jets[0].pt() >= 40.7) continue;
         if(jets[1].pt() < 9.4 || jets[1].pt() >= 31.2) continue;
         
+        
         // Check for dijet condition
         float dphi = std::abs(jets[0].phi() - jets[1].phi());
         if (dphi > M_PI) dphi = 2 * M_PI - dphi;
+        //if (dphi < (3.0 * M_PI / 4.0)) continue;
         if (dphi < (3.0 * M_PI / 4.0)) continue;
-       
+        // filling q2 2d hist
+        
+        float avjet = (jets[0].pt() + jets[1].pt())/2;
+        float pmq2f = ((avjet * avjet));
+        //float pmq2q = (jets[0].pt() + jets[1].pt()) * (jets[0].pt() + jets[1].pt());
+        float pmq = avjet;
+        float pthat = pythia.info.pTHat();
+        qvspmq.Fill(avjet, pthat);
+        
+        
+        //cout << "pmq = " << pmq << " q = " << q <<  endl;
+        
+        //! select di-jets on jet pT 
+        if(jets[0].pt() < 31.2  || jets[0].pt() >= 40.7) continue;
+        if(jets[1].pt() < 9.4 || jets[1].pt() >= 31.2) continue;
+        
         dijet_event_counter++;
         
+        /*
         // Jet spectra of dijet events that pass the cut 
          for (size_t i = 0; i < jets.size(); ++i) {
             if (jets[i].pt() < 5) continue;
@@ -270,32 +287,36 @@ int main(int argc, char* argv[]) {
         //jet spectra
         LeadingJetSpectrum.Fill(jets[0].pt());
         SubleadingJetSpectrum.Fill(jets[1].pt());
-
+        */
         //putting thermal particle pushback here 
         vector<PseudoJet> thermalParticles = thermalGen(1500);
         
         for (size_t i = 0; i < thermalParticles.size(); ++i) {
+            etavphit.Fill(thermalParticles.at(i).eta(), thermalParticles.at(i).phi());
+            ThermalPhi.Fill(thermalParticles.at(i).phi());
             for (size_t j = i + 1; j < thermalParticles.size(); ++j) {
                 float eect = thermalParticles.at(i).pt() * thermalParticles.at(j).pt();  
                 float cthetat = costheta(thermalParticles.at(i), thermalParticles.at(j));
+                float delphit = deltaphi(thermalParticles.at(i), thermalParticles.at(j));
                 float zt = (1 - cthetat)/2;
-                EEC_t.Fill(z, eect);
+                EEC_t.Fill(zt, eect);
+                EEC_td.Fill(delphit, eect);
+                Deltaphi.Fill(delphit, eect);
+                
             }
         }
-        
+       /* 
         //cout << "Initial Charged event size = " << charged_event.size() << endl;
         
         charged_event.insert(charged_event.end(), thermalParticles.begin(), thermalParticles.end());
         
-        cout << "Final Charged event size = " << charged_event.size() << endl;
-        
-    
         for (size_t i = 0; i < charged_event.size(); ++i) {
             for (size_t j = i + 1; j < charged_event.size(); ++j) {
 
                 float eec = charged_event.at(i).pt() * charged_event.at(j).pt();  
                 float ctheta = costheta(charged_event.at(i), charged_event.at(j));
-                float pmq2 = ((jets[0].pt() + jets[1].pt())/2) *  ((jets[0].pt() + jets[1].pt())/2); // average of leading jets pt squared 
+                float avejet = jets[0].pt() + jets[1].pt();
+                float pmq2 = (avejet*avejet) / 4; // average of leading jets pt squared 
                 float z = (1 - ctheta)/2; 
                 float delphi = deltaphi(charged_event.at(i), charged_event.at(j));
                 EEC_w.Fill(z, eec/pmq2);
@@ -311,7 +332,7 @@ int main(int argc, char* argv[]) {
                 if (jets[1].pt() >= 27.3 && jets[1].pt() < 31.2) EEC_w_highphi.Fill(delphi, eec/pmq2);
             }
         }//!Whole event EEC loop close 
-
+    */
     }//! event loop 
     
     cout << " total # of dijet events = " << dijet_event_counter << endl;
