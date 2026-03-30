@@ -1,29 +1,29 @@
 #!/bin/bash
 
 #SBATCH --mail-user=laurynette.griffin@vanderbilt.edu
-
 #SBATCH --mail-type=ALL
-
 #SBATCH --nodes=1
-
 #SBATCH --cpus-per-task=2
-
 #SBATCH --mem=32G
-
-#SBATCH --time=04:00:00
-
-#SBATCH --job-name=wholeevent_EEC_ee
-
-#SBATCH --output=../offline/pythia_wholeeventEEC_ee_starEEC_Feb21.root
-
-#SBATCH --output=logs/main5112.log
-
+#SBATCH --time=2:00:00
+#SBATCH --job-name=ee_recrea
+#SBATCH --array=1-10             # Submit 100 jobs in the array
+#SBATCH --output=logs/main5112_%A_%a.log
 #SBATCH --account=rke_group
 
-source /home/griffl6/setup_pythia8312.sh
+# Load environment
+source /home/griffl6/setup_pythia.sh
 
-cd /home/griffl6/work/pythia/examples
+# Navigate to working directory
+cd /home/griffl6/work/pythia/wEECstudies
 
-./main5112 main5112.cmnd 
+# Get current date 
+DATE=$(date +%Y-%m-%d)
 
-echo "Job Finished"
+# unique output file name
+OUTPUT_FILE="/home/griffl6/work/pythia/outfiles/pythia_ee_aleph_100k__${DATE}_${SLURM_ARRAY_TASK_ID}.root"
+
+# Run with output file as argument
+./main5112 main5112.cmnd $OUTPUT_FILE
+
+echo "Job $SLURM_ARRAY_TASK_ID finished"

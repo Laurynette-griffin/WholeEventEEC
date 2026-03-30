@@ -20,15 +20,15 @@ void drawText(const char *text, float xp, float yp, int size){
 }
 
 void fourto1plot(){
-    
+    /*
     TH1::SetDefaultSumw2();
-    TFile* fin = TFile::Open("files/pythia_pp_rhic_fullevent_thermal_1mill_mixedeventstudy_centrality0-3_2025-05-14m.root");
+    TFile* fin = TFile::Open("../../outfiles/pythia_pp_rhic_fullevent_8pthat70_pt1variable_1mil_2025-05-26_22.root");
 
     
-    TH1F* histEECwhole = (TH1F*)fin->Get("EEC_w_phi");
-    TH1F* histEEChigh = (TH1F*)fin->Get("EEC_w_hiphi"); // aj < .1
-    TH1F* histEECmid = (TH1F*)fin->Get("EEC_w_midphi"); // aj < .667
-    TH1F* histEEClow = (TH1F*)fin->Get("EEC_w_lowphi"); // aj < .15003
+    TH1F* histEECwhole = (TH1F*)fin->Get("EEC_w");
+    TH1F* histEEChigh = (TH1F*)fin->Get("EEC_h"); // aj < .1
+    TH1F* histEECmid = (TH1F*)fin->Get("EEC_m"); // aj < .667
+    TH1F* histEEClow = (TH1F*)fin->Get("EEC_l"); // aj < .15003
     
     TH1F* histjetspec = (TH1F*)fin->Get("JetSpectrum");
     TH1F* histleadingjetspec = (TH1F*)fin->Get("LeadingJetSpectrum");
@@ -42,6 +42,7 @@ void fourto1plot(){
     //TCanvas* canvas5 = new TCanvas("canvas5", "Jet Spectrum", 800, 600);
     //TCanvas* canvas6 = new TCanvas("canvas6", "Jet Spectrum leading", 800, 600);
     //TCanvas* canvas7 = new TCanvas("canvas7", "Jet Spectrum subleading", 800, 600);
+    */
     TCanvas* canvas5 = new TCanvas("canvas5", "Comparison", 800, 600);
     //TCanvas* canvas5 = new TCanvas("canvas5", "Comparison", 800, 600);
     
@@ -63,7 +64,7 @@ void fourto1plot(){
     axis2->SetTickSize(0.05);
 
 
-    
+ /*   
     canvas1->cd();
     canvas1->SetLogy();
 
@@ -83,8 +84,8 @@ void fourto1plot(){
     
         TH1F* EEC_empty = new TH1F("EEC_empty", "WEEC", 60, 0, 60);
         EEC_empty->SetStats(0);
-        EEC_empty->SetMinimum(1e-4);
-        EEC_empty->SetMaximum(.5);
+        EEC_empty->SetMinimum(1e-1);
+        EEC_empty->SetMaximum(1e2);
         EEC_empty->GetXaxis()->SetLabelOffset(999);
         EEC_empty->GetXaxis()->SetTitleOffset(999);
         EEC_empty->GetXaxis()->SetTickLength(0);
@@ -98,7 +99,7 @@ void fourto1plot(){
             EEC_w_p->SetBinError(bin, histo1->GetBinError(bin));
         }
         
-        
+    
         TH1F* hrebintest = (TH1F*)EEC_w_p->Clone("hrebintest");
         hrebintest->Rebin(6);
         hrebintest->Scale(1./6);
@@ -338,17 +339,19 @@ void fourto1plot(){
         drawText("jet p_{T2} > 9.4 GeV", 0.20, 0.75, 18);
         drawText("charged constituent p_{T} > .2 GeV", 0.20, .71, 18 );
         canvas4->SaveAs("Centrality4045.png");
-
+    */
         canvas5->cd();
         canvas5->SetLogy();
 
         TH1F* EEC_empty5 = new TH1F("EEC_empty5", "WEEC", 60, 0, 60);
         EEC_empty5->GetXaxis()->SetTickLength(0);
         EEC_empty5->SetMinimum(1e-1);
-        EEC_empty5->SetMaximum(1);
+        EEC_empty5->SetMaximum(100);
+        EEC_empty5->GetXaxis()->SetLabelOffset(999);
+        
         EEC_empty5->SetStats(0);
         EEC_empty5->Draw("P E1");
-  
+    /*
         EEC_w_h->SetLineColor(kGreen+2);
         EEC_w_h->SetMarkerStyle(24);
         EEC_w_h->SetMarkerColor(kGreen+2);
@@ -378,13 +381,14 @@ void fourto1plot(){
         EEC_w_l->Draw("P E1 SAME");
         EEC_w_m->Draw("P E1 SAME");
         EEC_w_h->Draw("P E1 SAME");
-      
+      */
         cout <<"seg" << endl;
         axis1->Draw();
         axis2->Draw();
         
         drawText("0.5", 0.4875, .06, 17 );
         drawText("z = (1 - cos(#theta))/2", 0.8, .025, 16);
+        /*
         //drawText("#Delta#Phi", 0.8, .025, 16);
         drawText("p+p #sqrt{s} = 200 GeV", 0.20, 0.88, 16);
         drawText("anti-k_{T} R_{jet} = 0.4 |#eta < 0.7|", 0.20, 0.84, 16);
@@ -401,11 +405,12 @@ void fourto1plot(){
         
         legend->Draw();
         cout <<"seg" << endl;
-        canvas5->SaveAs("centralitystudyWEECphiMay16.png");
+        */
+        canvas5->SaveAs("blankweec.png");
         
     //delete EEC_w_p;
-    delete EEC_w_h;
-    delete EEC_w_m;
-    delete EEC_w_l;
+    //delete EEC_w_h;
+    //delete EEC_w_m;
+    //delete EEC_w_l;
     
     }

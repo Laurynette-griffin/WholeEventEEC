@@ -1,0 +1,36 @@
+! Detroit Tune for PYTHIA 8  
+! LEP e+e- → dijets  
+
+! Random seed settings  
+Random:setSeed = on  
+Random:seed = 0
+
+! Beam setup: LEP e+e- collision  
+Beams:idA = -11   ! Beam: e+  
+Beams:idB = 11    ! Beam: e-  
+Beams:eCM = 91.2  ! Center-of-mass energy (LEP1 Z-pole)  
+
+! Tune settings  
+Tune:ee = 7  
+
+! Disable PDFs (not needed for e+e- collisions)  
+! PDF:lepton = off  
+
+ 
+
+! Enable Z boson production and decay  
+WeakSingleBoson:all = on
+WeakBosonExchange:all = on
+23:onMode = off                 ! Turn off all Z decays  
+23:onIfAny = 1 2 3 4 5           ! Allow hadronic Z decays (u, d, s, c, b)  
+
+! Enforce physical decays  
+ParticleDecays:limitTau0 = on  
+ParticleDecays:tauMax = 10  
+
+
+
+! Output settings  
+Stat:showProcessLevel = on  
+Stat:showErrors = on  
+

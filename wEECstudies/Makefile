@@ -135,7 +135,7 @@ else
 endif
 
 # ROOT with FastJet. 
-main142 main511 main5111 main5112 main5111mpioff main5111isroff main5111bothoff main5113 main511re main511tw main511th main511t ThermalPhiStudy wEEC: $(PYTHIA) $$@.cc 
+wEEC_hydro closuretrialdelrdelphi closuretrialztheta main5111 main5112 main5111mpioff main5111isroff main5111bothoff main5113 main511t ThermalPhiStudy wEEC CentralityStudy03  CentralityStudy1015  CentralityStudy2530 CentralityStudy4045 AlephwEEC centralitymbs02 centralitymbs1 centralitymbs2 centralitymbs4 centralitymbs6 centralitymbs8: $(PYTHIA) $$@.cc 
 ifeq ($(ROOT_USE)$(FASTJET3_USE),truetrue)
 	$(CXX) $@.cc -o $@ -w $(CXX_COMMON) $(FASTJET3_OPTS) $(ROOT_OPTS)
 else	
@@ -189,7 +189,7 @@ else
 endif
 
 # Optional RIVET.
-: $(PYTHIA) $$@.cc
+main421: $(PYTHIA) $$@.cc
 	$(CXX) $@.cc -o $@ $(if $(filter true,$(RIVET_USE)),\
 	 -w $(RIVET_OPTS),$(CXX_COMMON))
 
